@@ -1,7 +1,9 @@
+mport numpy as np
 import pandas as pd
-import numpy as np
 
-df = pd.read_csv('cones.csv')
+input_filename = input()
+
+df = pd.read_csv(input_filename)
 
 df['distance_to_origin'] = np.sqrt(df['x']**2 + df['y']**2)
 df_sorted = df.sort_values(by='distance_to_origin')
@@ -15,22 +17,15 @@ df_yellow.drop(columns=['distance_to_origin']).to_csv('yellow_cones.csv', index=
 midpoints = []
 
 for _, blue_row in df_blue.iterrows():
-    bx = blue_row['x']
-    by = blue_row['y']
-    
+    bx, by = blue_row['x'], blue_row['y']
     distances_to_yellow = np.sqrt((df_yellow['x'] - bx)**2 + (df_yellow['y'] - by)**2)
-    
-    nearest_idx = distances_to_yellow.idxmin()
-    nearest_yellow = df_yellow.loc[nearest_idx]
-    
-    mid_x = (bx + nearest_yellow['x']) / 2
-    mid_y = (by + nearest_yellow['y']) / 2
+    nearest_yellow = df_yellow.loc[distances_to_yellow.idxmin()]
     
     midpoints.append({
         'blue_id': blue_row['cone_id'],
         'yellow_id': nearest_yellow['cone_id'],
-        'mid_x': mid_x,
-        'mid_y': mid_y
+        'mid_x': (bx + nearest_yellow['x']) / 2,
+        'mid_y': (by + nearest_yellow['y']) / 2
     })
 
 df_centreline = pd.DataFrame(midpoints)
